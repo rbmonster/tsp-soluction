@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Spring Boot Hello World Example with JSP</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.8.5/echarts-en.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
+</head>
+<body>
+<h2>Spring Boot Hello World Example with JSP</h2>
+<button type="button" name="ga" id="ga">登陆</button>
+<div id="chart" style="width: 100%;height:400px;"></div>
+</body>
+<script type="text/javascript">
+    var option = {
+        title: {
+            text: '基于蚁群算法的负载均衡调度策略'
+        },
+        tooltip: {
+            trigger: 'axis',
+            showDelay: 0,
+            axisPointer: {
+                show: true,
+                type: 'cross',
+                lineStyle: {
+                    type: 'dashed',
+                    width: 1
+                }
+            },
+            zlevel: 1
+        },
+        legend: {
+            data: ['传统蚁群算法', '优化的蚁群算法']
+        },
+        toolbox: {
+            show: true,
+            feature: {
+                mark: {show: true},
+                dataZoom: {show: true},
+                dataView: {show: true, readOnly: false},
+                restore: {show: true},
+                saveAsImage: {show: true}
+            }
+        },
+        xAxis: [
+            {
+                type: 'value',
+                scale: true,
+                name: '迭代次数'
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                scale: true,
+                name: '任务处理时间'
+            }
+        ],
+        series: [
+            {
+                name: '传统蚁群算法',
+                type: 'scatter',
+                large: true,
+                symbolSize: 3,
+                data: ['12', '32', '45', '78', '60']
+            }]
+    }
+    // 初始化图表标签
+    var myChart = echarts.init(document.getElementById('chart'));
+    myChart.setOption(option);
+
+    window.onload = function () {
+        $.ajax({
+            url: "/tsp/ga",
+            dataType: "json",
+            type: "post",
+
+            success: function (result) {
+                option.series = [
+                    {
+                        name: '传统蚁群算法',
+                        type: 'scatter',
+                        large: true,
+                        symbolSize: 3,
+                        data: result
+                    }]
+                myChart.setOption(option)
+            },
+            error: function (data) {
+                alert("请求出错");
+            }
+        });
+    }
+
+    $("#ga").click(function () {
+        console.log(option.series);
+        $.ajax({
+            url: "/tsp/ga",
+            dataType: "json",
+            type: "post",
+
+            success: function (result) {
+                option.series = [
+                    {
+                        name: '传统蚁群算法',
+                        type: 'scatter',
+                        large: true,
+                        symbolSize: 3,
+                        data: result
+                    }]
+                myChart.setOption(option)
+            },
+            error: function (data) {
+                alert("请求出错");
+            }
+        });
+    });
+</script>
+</html>

@@ -1,0 +1,9 @@
+server:
+  port: 9999
+spring:
+  thymeleaf:
+    mode: HTML
+    cache: false
+    encoding: UTF-8
+    prefix: classpath:/templates/
+    suffix: .html
