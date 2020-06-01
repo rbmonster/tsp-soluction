@@ -1,4 +1,4 @@
-package tsp.soluction.demo.mmas;
+package tsp.soluction.demo.mmasbk;
 import java.util.*;
 
 /**
@@ -12,7 +12,7 @@ import java.util.*;
  * @Author: sanwu
  * @Date: 2020/5/17 13:20
  */
-public class Ant {
+public class AntOri {
 
     //禁忌表
     private List<Integer> tabu;
@@ -28,7 +28,7 @@ public class Ant {
     private double beta;
     private double[] phePercentage = new double[cityNum];
 
-    Ant(int cityNum, double alpha, double beta) {
+    AntOri(int cityNum, double alpha, double beta) {
         this.cityNum = cityNum;
         this.alpha = alpha;
         this.beta = beta;
@@ -53,24 +53,35 @@ public class Ant {
     //轮盘赌选择,对于第一只蚂蚁，每个方向上的可能性是一样的，先归一化信息素矩阵
     public void chooseNextCity() {
         while (allowed.size() > 0) {
-            double[] prob = Arrays.copyOf(City.getProb(currentCity), cityNum);
+            double[] nextCityPheromone = Arrays.copyOf(CityOri.getCityPheromone(currentCity), cityNum);//得到从当前城市可到达的下一城市，可根据City形式改变
+            double[] nextCityDistance = Arrays.copyOf(CityOri.getCityDistance(currentCity), cityNum);
+//            System.out.println("current distance is :" + Arrays.toString(nextCityDistance));
+            //去除不可到达城市
             for (int i = 0; i < tabu.size(); i++) {
-                prob[tabu.get(i)] = 0;
+                nextCityPheromone[tabu.get(i)] = 0;
+                nextCityDistance[tabu.get(i)] = 0;
             }
-            double sum = Arrays.stream(prob).sum();
+            phePercentage = new double[cityNum];
+            //轮盘赌选择
             int tempCity = -1;
-            while (true){
-                double roundPoint =  random.nextDouble()* sum;
-                for (int i = 0; i < prob.length; i++) {
-                    if (prob[i] == 0) {
-                        continue;
-                    }
-                    roundPoint = roundPoint - prob[i];
-                    if (roundPoint < 0) {
-                        tempCity = i;
-                        break;
-                    }
+            double sumParam = 0;
+            for (int i = 0; i < nextCityPheromone.length; i++) {
+                if (nextCityPheromone[i] == 0){
+                    continue;
                 }
+                double tmp =  Math.pow(nextCityPheromone[i], alpha)
+                        * Math.pow(1.0 / nextCityDistance[i], beta);
+                sumParam += tmp;
+                phePercentage[i] = tmp;
+            }
+            for (int i = 0; i < phePercentage.length; i++) {
+                phePercentage[i] = phePercentage[i]/sumParam;
+            }
+            for (int i = 1; i < phePercentage.length; i++) {
+                phePercentage[i] += phePercentage[i-1];
+            }
+            while (true) {
+                tempCity = getTempCity(nextCityPheromone, nextCityDistance, tempCity, sumParam);
                 if (tempCity == -1){
                     continue;
                 }
@@ -78,7 +89,7 @@ public class Ant {
                     break;
                 }
             }
-            //轮盘赌选择
+//            roadLength += City.getDistance(currentCity, tempCity);
             currentCity = tempCity;
             tabu.add(currentCity);
             allowed.removeAll(tabu);
@@ -87,9 +98,9 @@ public class Ant {
 //        roadLength += City.getDistance(currentCity, tabu.get(0));
         roadLength = 0;
         for (int i = 1; i < tabu.size(); i++) {
-            roadLength += City.getDistance(tabu.get(i-1), tabu.get(i));
+            roadLength += CityOri.getDistance(tabu.get(i-1), tabu.get(i));
         }
-        roadLength += City.getDistance(currentCity, tabu.get(0));
+        roadLength += CityOri.getDistance(currentCity, tabu.get(0));
     }
 
     //轮盘赌选择,对于第一只蚂蚁，每个方向上的可能性是一样的，先归一化信息素矩阵

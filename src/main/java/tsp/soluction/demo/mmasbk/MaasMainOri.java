@@ -1,4 +1,4 @@
-package tsp.soluction.demo.mmas;
+package tsp.soluction.demo.mmasbk;
 
 
 import java.util.*;
@@ -14,24 +14,24 @@ import java.util.*;
  * @Author: sanwu
  * @Date: 2020/5/17 13:25
  */
-public class MaasMain {
+public class MaasMainOri {
 
-    private City initCity;
+    private CityOri initCity;
     private int cityNum = 30;
-    private int p = 1000;//迭代次数
+    private int p = 100;//迭代次数
     private double bestLength;
     private String bestTour;
     private int antNum = 100;
-    private Ant[] ants;
+    private AntOri[] ants;
 
     // 信息启发因子
     private double alpha = 1.0;
     // 信息期望启发因子
     private double beta = 2;
     // 信息挥发因子
-    private double rho = 0.8;
+    private double rho = 0.95;
 
-//    private static double numBest = 0.05; // 一次找到最优路径的概率
+    private static double numBest = 0.05; // 一次找到最优路径的概率
     // 信息素的量
     private double Q = 1000;
     private Integer bestAntIndex = -1;
@@ -39,7 +39,12 @@ public class MaasMain {
     public List<Integer> bestPath = new LinkedList<>();
 
     public static void main(String[] args) {
-        MaasMain main = new MaasMain();
+        //
+        double cityNum =100;
+        double tmp = Math.exp(Math.log(numBest)/cityNum);
+        // 最大最小值之间的比例
+        double mmRate =(2/tmp-2)/(cityNum -2);
+        MaasMainOri main = new MaasMainOri();
         main.run();
     }
 
@@ -60,7 +65,7 @@ public class MaasMain {
 
     //初始化城市信息，假设为非对称TSP问题
     private void init_Distance() {
-        initCity = new City(cityNum, false ,alpha, beta, rho);
+        initCity = new CityOri(cityNum, false);
     }
 
     //参数初始化
@@ -74,9 +79,9 @@ public class MaasMain {
      */
     private void init_Ants() { //每次循环的每只蚂蚁都是新蚂蚁，没有残留信息
         ants = null;
-        ants = new Ant[antNum];
+        ants = new AntOri[antNum];
         for (int i = 0; i < antNum; i++) {
-            ants[i] = new Ant(cityNum, alpha, beta);
+            ants[i] = new AntOri(cityNum, alpha, beta);
         }
     }
 
@@ -95,11 +100,6 @@ public class MaasMain {
     }
 
     //记录当前最好解
-
-    /**
-     * TODO 设置信息素最大最小
-     * @param time
-     */
     private void findBestRoad(int time) {
         for (int i = 0; i < antNum; i++) {
             ArrayList preResult = new ArrayList();
@@ -119,6 +119,6 @@ public class MaasMain {
 
     //按更新方程修改轨迹长度
     private void updatePheromone() {
-        initCity.updatePheromone(Q, ants[bestAntIndex]);
+        initCity.updatePheromone(Q, ants[bestAntIndex].getPath());
     }
 }

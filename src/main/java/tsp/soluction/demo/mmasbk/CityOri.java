@@ -1,6 +1,5 @@
-package tsp.soluction.demo.mmas;
+package tsp.soluction.demo.mmasbk;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -15,13 +14,9 @@ import java.util.Random;
  * @Author: sanwu
  * @Date: 2020/5/17 13:19
  */
-public class City {
+public class CityOri {
     private static double distance[][];
     private static double pheromone[][];
-    // 根据信息素计算的概率函数
-    private static double prob[][];
-    // 根据距离计算的概率函数
-    private static double distanceBeta[][];
     private static int num;
     Random random = new Random();
     private int min = 2;
@@ -32,41 +27,25 @@ public class City {
     private double beta = 2;
     // 信息挥发因子
     private double rho = 0.95;
-    // 一次找到最优路径的概率
-    private static double numBest = 0.05;
 
-    // 信息素上限
-    private double pheromMax = 0;
-    // 信息素下限
-    private double pheromMin = 0;
-    // 最大最小信息素的比例
-    private double mmRate;
-
-    public City(int num, boolean symmetryFlag, double alpha, double beta, double rho) {
+    public CityOri(int num, boolean symmetryFlag, double alpha, double beta, double rho) {
         this.alpha = alpha;
         this.beta = beta;
         this.rho = rho;
         this.num = num;
         initDistance(symmetryFlag);
         initPheromone();
-        initMmasParameter();
     }
 
-    public City(int num, boolean symmetryFlag) {
+    public CityOri(int num, boolean symmetryFlag) {
         this.num = num;
         initDistance(symmetryFlag);
         initPheromone();
     }
 
-    private void initMmasParameter(){
-        double tmp = Math.exp(Math.log(numBest)/num);
-        // 最大最小值之间的比例
-        mmRate =(2/tmp-2)/(num -2);
-    }
-
     private void initDistance(boolean symmetryFlag) {
 //        distance = new double[num][num];
-        //distance是一个对称阵，且对角元素设为无穷大；对角线元素不会被用到，如果算法正确
+//        //distance是一个对称阵，且对角元素设为无穷大；对角线元素不会被用到，如果算法正确
 //        for (int i = 0; i < num; i++) {
 //            if (symmetryFlag) {
 //                for (int j = i; j < num; j++) {
@@ -86,7 +65,6 @@ public class City {
 //                }
 //            }
 //        }
-        int [][] taa = {{123,123},{123,11}};
         distance = new double[][]{{0.0, 62.688755870316974, 99.89436511341816, 41.89630850035449, 55.364490449768276, 76.4666914372237, 81.03885335195375, 80.22198949566219, 84.31650530983178, 85.57835262526116, 27.878880500789187, 36.7050211664927, 86.88914177279167, 96.38409490113175, 81.82668214369178, 27.26744172489623, 73.93440799566099, 71.84647901799423, 69.611799392534, 31.632382130342265, 32.83000938960603, 76.7595542749642, 94.70014186230357, 7.475660593284674, 16.8974237850573, 63.30046958922474, 47.71866896129891, 60.58775215944333, 52.39570403444055, 65.9049353242746},
                 {8.952165660354149, 0.0, 17.181406206913913, 47.705348269261776, 58.626291897813694, 25.589946722510426, 76.66969836632704, 14.209101261738226, 32.858557675807525, 41.0740269921114, 16.991226010949344, 7.331677120001479, 78.58715711598926, 13.636813520581999, 45.873647233055536, 13.217970537158894, 44.17662661905514, 13.91501001515386, 84.30365272870273, 91.60936416101065, 80.11284706224298, 43.38790695374147, 42.91099212760944, 46.620355797143624, 83.08806722674535, 54.311935239431335, 45.976050203539906, 46.32278821490471, 96.3501291605989, 21.809817565529514},
                 {95.33497906680658, 31.31254953128176, 0.0, 96.33308062435216, 75.82133109322805, 15.583344192181388, 63.76368407351687, 24.244520196176524, 76.73416421044918, 36.66863497264903, 95.86744731487632, 94.50570755626649, 43.68708917059777, 50.2140142528372, 92.00888676496848, 73.72374772087522, 70.77402593785285, 45.730114017922226, 26.55113579830219, 58.22075485640594, 5.676409163015426, 8.248599110023294, 74.67769046546712, 75.05321013773069, 23.612589880804073, 25.850728498413716, 5.385474064747886, 14.92536339948988, 72.91682962087167, 28.066079226833825},
@@ -119,80 +97,36 @@ public class City {
                 {79.94243912370085, 38.939988608394735, 73.57101636708335, 72.93054256915138, 17.96204662247598, 18.11395795811797, 52.46522526144038, 48.756831185793565, 68.20986472688911, 71.42725941796138, 25.602722510846615, 82.07454042247149, 78.05342435989796, 74.31703160735773, 29.645096068081607, 19.409188460997612, 98.96827495312974, 90.01769841644847, 86.419699653143, 37.63675757946513, 36.98317346684174, 20.340673995476255, 10.18714925606984, 60.266475375752506, 59.68472057627968, 19.429371278589404, 24.118475417818306, 11.420634749020508, 45.789352852274504, 0.0},
 
         };
-        distanceBeta = new double[num][num];
-        for (int i = 0; i < num; i++) {
-            for (int j = 0; j < num; j++) {
-                distanceBeta[i][j] = Math.pow( 1.0/ distance[i][j], beta);
-            }
-        }
         printlnDistance();
     }
 
-    /**
-     * 初始化信息素和概率函数
-     */
     private void initPheromone() {
         pheromone = new double[num][num];
-        prob = new double[num][num];
         for (int i = 0; i < num; i++) {
             for (int j = 0; j < num; j++) {
                 if (i == j) {
                     pheromone[i][j] = 0;
                     continue;
                 }
-                pheromone[i][j] = 1000;
-                prob[i][j] = Math.pow(pheromone[i][j], alpha) * distanceBeta[i][j];
+                pheromone[i][j] = 100;
             }
         }
     }
 
-    public void updatePheromone(double Q, Ant bestAnt) {
-        List<Integer> bestPath = bestAnt.getPath();
-
-        double [][] addPheromone  = new double[num][num];
-        // 信息素增量
-        double pheAdd = 1/bestAnt.getRoadLength();
+    public void updatePheromone(double Q, List<Integer> bestPath) {
+        for (int i = 0; i < num; i++) {
+            for (int j = 0; j < num; j++) {
+                pheromone[i][j] = pheromone[i][j] * rho;
+            }
+        }
         for (int i = 1; i < bestPath.size(); i++) {
             int start = bestPath.get(i-1);
             int end = bestPath.get(i);
-            addPheromone[start][end] +=pheAdd;
+            pheromone[start][end] = pheromone[start][end] * beta;
         }
-        // 最后城市到第一个城市
         int start = bestPath.get(bestPath.size()-1);
         int end = bestPath.get(0);
-        addPheromone[start][end] +=pheAdd;
-        for (int i = 0; i < num; i++) {
-            for (int j = 0; j < num; j++) {
-                pheromone[i][j] = pheromone[i][j] * rho+ addPheromone[i][j];
-            }
-        }
-        double maxPheromone=1.0/(bestAnt.getRoadLength()*(1.0-rho));
-        double minPheromone=maxPheromone*mmRate;
-        for (int i = 0; i < num; i++) {
-            for (int j = 0; j < num; j++) {
-                if (pheromone[i][j] > maxPheromone){
-                    pheromone[i][j] = maxPheromone;
-                }
-                if (pheromone[i][j] < minPheromone){
-                    pheromone[i][j] = minPheromone;
-                }
-            }
-        }
-
-        for (int i = 0; i < num; i++) {
-            for (int j = 0; j < num; j++) {
-//                if (i == j) {
-//                    pheromone[i][j] = 0;
-//                    continue;
-//                }
-                prob[i][j] = Math.pow(pheromone[i][j], alpha) * distanceBeta[i][j];
-            }
-        }
-//        for (int i = 0; i < num; i++) {
-//            for (int j = 0; j < num; j++) {
-//                pheromone[i][j] = pheromone[i][j] * rho;
-//            }
-//        }
+        pheromone[start][end] +=pheromone[start][end] * beta;
 //        for (int i = 0; i < bestPath.size(); i++) {
 //            Integer cityIndex = bestPath.get(i);
 //            pheromone[cityIndex][i] = pheromone[cityIndex][i] * beta;
@@ -222,10 +156,6 @@ public class City {
         return pheromone[i][j];
     }
 
-    public static double[] getProb(int i) {
-        return prob[i];
-    }
-
     public static double[] getCityPheromone(int i) {
         return pheromone[i];
     }
@@ -239,33 +169,18 @@ public class City {
     }
 
     public static void printlnDistance() {
-//        System.out.println("distance is :");
-//        System.out.printf("%8s", "");
-//        for (int i = 0; i < num; i++) {
-//            System.out.printf("%5s", i);
-//        }
-//        System.out.println();
-//        for (int i = 0; i < num; i++) {
-//            System.out.printf("%5s", i);
-//            for (int j = 0; j < num; j++) {
-//                System.out.printf("%5s", (int) distance[i][j]);
-//            }
-//            System.out.println();
-//        }
         System.out.println("distance is :");
-//        for (int i = 0; i < num; i++) {
-//            System.out.printf("%5s", i);
-//        }
-//        System.out.println();
-//        for (int i = 0; i < num; i++) {
-//            System.out.printf("%5s", i);
-//            for (int j = 0; j < num; j++) {
-//                System.out.printf("%5s", (int) distance[i][j]);
-//            }
-//            System.out.println();
-//        }
+        System.out.printf("%8s", "");
         for (int i = 0; i < num; i++) {
-            System.out.println(Arrays.toString(distance[i]));
+            System.out.printf("%5s", i);
+        }
+        System.out.println();
+        for (int i = 0; i < num; i++) {
+            System.out.printf("%5s", i);
+            for (int j = 0; j < num; j++) {
+                System.out.printf("%5s", (int) distance[i][j]);
+            }
+            System.out.println();
         }
     }
 }
