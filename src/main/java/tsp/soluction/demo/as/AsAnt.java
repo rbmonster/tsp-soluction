@@ -1,4 +1,5 @@
-package tsp.soluction.demo.mmas;
+package tsp.soluction.demo.as;
+
 import java.util.*;
 
 /**
@@ -12,7 +13,7 @@ import java.util.*;
  * @Author: sanwu
  * @Date: 2020/5/17 13:20
  */
-public class Ant {
+public class AsAnt {
     //禁忌表
     private List<Integer> tabu;
     //允许访问的城市
@@ -23,7 +24,7 @@ public class Ant {
     private Random random;
     private List<Integer> path = new LinkedList<>();
 
-    Ant(int cityNum) {
+    AsAnt(int cityNum) {
         this.cityNum = cityNum;
         roadLength = 0.0;
         tabu = new ArrayList<Integer>();
@@ -48,10 +49,17 @@ public class Ant {
         path.add(currentCity);
     }
 
-    //轮盘赌选择,对于第一只蚂蚁，每个方向上的可能性是一样的，先归一化信息素矩阵
+    /**
+     * 选择下个城市
+     * 轮盘赌选择
+     * 公式: 求当前城市到允许城市的概率
+     *       (信息素)^alpha*(1/城市距离)^beta 除以
+     *       [sum](信息素)^alpha*(1/城市距离)^beta
+     *  本方法 使用 sum * (0~1)随机数
+     */
     public void chooseNextCity() {
         while (allowed.size() > 0) {
-            double[] prob = Arrays.copyOf(City.getProb(currentCity), cityNum);
+            double[] prob = Arrays.copyOf(AsCity.getProb(currentCity), cityNum);
             for (int i = 0; i < tabu.size(); i++) {
                 prob[tabu.get(i)] = 0;
             }
@@ -82,12 +90,11 @@ public class Ant {
             allowed.removeAll(tabu);
             path.add(currentCity);
         }
-//        roadLength += City.getDistance(currentCity, tabu.get(0));
         roadLength = 0;
         for (int i = 1; i < tabu.size(); i++) {
-            roadLength += City.getDistance(tabu.get(i-1), tabu.get(i));
+            roadLength += AsCity.getDistance(tabu.get(i-1), tabu.get(i));
         }
-        roadLength += City.getDistance(currentCity, tabu.get(0));
+        roadLength += AsCity.getDistance(currentCity, tabu.get(0));
     }
 
     public double getRoadLength() {
