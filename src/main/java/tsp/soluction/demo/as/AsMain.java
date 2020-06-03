@@ -118,6 +118,6 @@ public class AsMain {
 
     //按更新方程修改轨迹长度
     private void updatePheromone() {
-        initCity.updatePheromone(ants[bestAntIndex]);
+        initCity.updatePheromone(ants);
     }
 }

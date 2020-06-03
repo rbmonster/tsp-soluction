@@ -44,25 +44,35 @@ public class AsCity {
         initPheromone();
     }
 
-    public void updatePheromone(AsAnt bestAnt) {
+    /**
+     * AS 蚁群算法更新信息素
+     * 1.信息素rho挥发衰减
+     * 2.完成一次循环后对全局信息素进行更新，更新策略为蚁周模型
+     * 3.遍历所有蚂蚁的路径，增加经过的每条路径的信息素。增加的信息素的量为: (信息素)/(路径)
+     * @param ants
+     */
+    public void updatePheromone(AsAnt[] ants) {
         // 信息素挥发
         for (int i = 0; i < cityNum; i++) {
             for (int j = 0; j < cityNum; j++) {
                 pheromone[i][j] = pheromone[i][j] * rho;
             }
         }
-        List<Integer> bestPath = bestAnt.getPath();
-        // 信息素增量
-        double pheAdd = initPheromone/bestAnt.getRoadLength();
-        for (int i = 1; i < bestPath.size(); i++) {
-            int start = bestPath.get(i-1);
-            int end = bestPath.get(i);
-            pheromone[start][end] += pheAdd;
+
+        for (int i = 0; i < ants.length; i++) {
+            List<Integer> path = ants[i].getPath();
+            // 信息素增量
+            double pheAdd = initPheromone/ants[i].getRoadLength();
+            for (int j = 1; j < path.size(); j++) {
+                int start = path.get(j-1);
+                int end = path.get(j);
+                pheromone[start][end] += pheAdd;
+            }
+            // 最后城市到第一个城市
+            int start = path.get(path.size()-1);
+            int end = path.get(0);
+            pheromone[start][end] +=pheAdd;
         }
-        // 最后城市到第一个城市
-        int start = bestPath.get(bestPath.size()-1);
-        int end = bestPath.get(0);
-        pheromone[start][end] +=pheAdd;
         // 重新计算转移概率
         for (int i = 0; i < cityNum; i++) {
             for (int j = 0; j < cityNum; j++) {
