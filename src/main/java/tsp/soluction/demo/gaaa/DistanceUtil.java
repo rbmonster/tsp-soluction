@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tsp.soluction.demo.GAAA;
+package tsp.soluction.demo.gaaa;
 
 import java.util.Random;
 
@@ -15,17 +15,18 @@ import java.util.Random;
 public class DistanceUtil {
 
     private static double distance[][];
-    private int num;
+    private static int num;
     Random random = new Random();
     private int min = 2;
     private int max = 100;
 
     public DistanceUtil(int num, boolean ifDuichen) {
         this.num = num;
-        initDistance(ifDuichen);
+        initDistance(num);
     }
 
-    private void initDistance(boolean ifDuichen) {
+    public static double[][] initDistance(int cityNum) {
+        num = cityNum;
 //        distance = new double[num][num];
 //        //distance是一个对称阵，且对角元素设为无穷大；对角线元素不会被用到，如果算法正确
 //        for (int i = 0; i < num; i++) {
@@ -81,13 +82,30 @@ public class DistanceUtil {
 
         };
         printlndistance();
+        return distance;
     }
 
     public static double getDistance(int i, int j) { //注意i,j和城市之间的对应关系
         return distance[i][j];
     }
 
-    private void printlndistance() {
+
+    /**
+     * 获取访问路径的长度
+     * TODO 这个看起来太复杂了
+     * @param road
+     * @return
+     */
+    public static double getDistance(Integer[] road) {
+        double roadLen = 0.0;
+        for (int i = 1; i < road.length; i++) {
+            roadLen += distance[road[i-1]][road[i]];
+        }
+        roadLen +=  distance[road[road.length-1]][road[0]];
+        return roadLen;
+    }
+
+    private static void printlndistance() {
         System.out.printf("%8s","");
         for (int i = 0; i < num; i++) {
             System.out.printf("%5s",i);
@@ -102,4 +120,10 @@ public class DistanceUtil {
         }
     }
 
+
+    public static void main(String[] args) {
+        DistanceUtil.initDistance(11);
+        Integer[] road= {0, 6, 22, 23, 24, 1, 7, 14, 17, 18, 11, 29, 21, 12, 25, 26, 8, 28, 20, 16, 15, 10, 13, 27, 5, 3, 4, 2, 19, 9};
+        System.out.println(DistanceUtil.getDistance(road));
+    }
 }

@@ -3,7 +3,8 @@ package tsp.soluction.demo.controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import tsp.soluction.demo.GAAA.Gaaa;
+import tsp.soluction.demo.as.AsMain;
+import tsp.soluction.demo.gaaa.Gaaa;
 import tsp.soluction.demo.mmas.MaasMain;
 
 /**
@@ -23,13 +24,22 @@ public class TspController {
 
     @PostMapping("/ga")
     public Object getGa(){
-//        Gaaa gaaa = new Gaaa();
-//        gaaa.run();
-//        ACO aco = new ACO();
-//        aco.iterator();
-        MaasMain maasMain = new MaasMain();
+        Gaaa gaaa =new Gaaa();
+        gaaa.run();
+        return gaaa.getResult();
+    }
+
+    @PostMapping("/as")
+    public Object getAs(){
+        AsMain asMain = new AsMain();
+        asMain.run();
+        return asMain.getResult();
+    }
+
+    @PostMapping("/mmas")
+    public Object getMmas(){
+        MaasMain maasMain =new MaasMain();
         maasMain.run();
         return maasMain.getResult();
     }
-
 }

@@ -1,6 +1,8 @@
 package tsp.soluction.demo.as;
 
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.util.StopWatch;
 
 import java.util.*;
@@ -16,11 +18,13 @@ import java.util.*;
  * @Author: sanwu
  * @Date: 2020/5/17 13:25
  */
+@Getter
+@Setter
 public class AsMain {
 
     private AsCity initCity;
     private int cityNum = 30;
-    private int p = 1000;//迭代次数
+    private int p = 300;//迭代次数
     private double bestLength;
     private String bestTourStr;
     private int antNum = 100;
@@ -55,6 +59,10 @@ public class AsMain {
             movetoNextCity();
             findBestRoad();
             updatePheromone();
+            ArrayList preResult = new ArrayList();
+            preResult.add(i);
+            preResult.add(bestLength);
+            result.add(preResult);
         }
     }
 
@@ -102,9 +110,6 @@ public class AsMain {
     private void findBestRoad() {
 //        bestLength = Double.MAX_VALUE;
         for (int i = 0; i < antNum; i++) {
-            ArrayList preResult = new ArrayList();
-            preResult.add(ants[i].getRoadLength());
-            result.add(preResult);
             if (bestLength > ants[i].getRoadLength()) {
                 bestLength = ants[i].getRoadLength();
                 bestTourStr = ants[i].getRoad();

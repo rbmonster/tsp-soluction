@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Spring Boot Hello World Example with JSP</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.8.5/echarts-en.min.js"></script>
+    <script src="https://cdn.staticfile.org/echarts/3.8.5/echarts-en.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
 </head>
 <body>
 <h2>Spring Boot Hello World Example with JSP</h2>
-<button type="button" name="ga" id="ga">登陆</button>
+<button type="button" name="ga" id="ga">遗传算法执行</button>
+<button type="button" name="as" id="as">蚁群算法执行</button>
+<button type="button" name="mmas" id="mmas">最大最小蚁群算法执行</button>
 <div id="chart" style="width: 100%;height:400px;"></div>
 </body>
 <script type="text/javascript">
@@ -30,7 +32,7 @@
             zlevel: 1
         },
         legend: {
-            data: ['传统蚁群算法', '优化的蚁群算法']
+            data: ['传统蚁群','遗传算法', '最大最小蚁群']
         },
         toolbox: {
             show: true,
@@ -53,12 +55,26 @@
             {
                 type: 'value',
                 scale: true,
-                name: '任务处理时间'
+                name: 'TSP路径长度'
             }
         ],
         series: [
             {
-                name: '传统蚁群算法',
+                name: '传统蚁群',
+                type: 'scatter',
+                large: true,
+                symbolSize: 3,
+                data: ['12', '32', '45', '78', '60']
+            },
+            {
+                name: '遗传算法',
+                type: 'scatter',
+                large: true,
+                symbolSize: 3,
+                data: ['12', '32', '45', '78', '60']
+            },
+            {
+                name: '最大最小蚁群',
                 type: 'scatter',
                 large: true,
                 symbolSize: 3,
@@ -69,28 +85,28 @@
     var myChart = echarts.init(document.getElementById('chart'));
     myChart.setOption(option);
 
-    window.onload = function () {
-        $.ajax({
-            url: "/tsp/ga",
-            dataType: "json",
-            type: "post",
-
-            success: function (result) {
-                option.series = [
-                    {
-                        name: '传统蚁群算法',
-                        type: 'scatter',
-                        large: true,
-                        symbolSize: 3,
-                        data: result
-                    }]
-                myChart.setOption(option)
-            },
-            error: function (data) {
-                alert("请求出错");
-            }
-        });
-    }
+    // window.onload = function () {
+    //     $.ajax({
+    //         url: "/tsp/ga",
+    //         dataType: "json",
+    //         type: "post",
+    //
+    //         success: function (result) {
+    //             option.series = [
+    //                 {
+    //                     name: '遗传算法',
+    //                     type: 'scatter',
+    //                     large: true,
+    //                     symbolSize: 3,
+    //                     data: result
+    //                 }]
+    //             myChart.setOption(option)
+    //         },
+    //         error: function (data) {
+    //             alert("请求出错");
+    //         }
+    //     });
+    // }
 
     $("#ga").click(function () {
         console.log(option.series);
@@ -100,14 +116,86 @@
             type: "post",
 
             success: function (result) {
-                option.series = [
-                    {
-                        name: '传统蚁群算法',
-                        type: 'scatter',
-                        large: true,
-                        symbolSize: 3,
-                        data: result
-                    }]
+                var index = -1;
+                for (let i = 0; i < option.series.length; i++) {
+                    if (option.series[i].name === '遗传算法') {
+                        index = i;
+                    }
+                }
+                if (index >= 0){
+                    option.series.splice(index,1)
+                }
+                option.series.push( {
+                    name: '遗传算法',
+                    type: 'scatter',
+                    large: true,
+                    symbolSize: 3,
+                    data: result
+                })
+                myChart.setOption(option)
+            },
+            error: function (data) {
+                alert("请求出错");
+            }
+        });
+    });
+
+    $("#as").click(function () {
+        console.log(option.series);
+        $.ajax({
+            url: "/tsp/as",
+            dataType: "json",
+            type: "post",
+
+            success: function (result) {
+                var index = -1;
+                for (let i = 0; i < option.series.length; i++) {
+                    if (option.series[i].name === '传统蚁群') {
+                        index = i;
+                    }
+                }
+                if (index >= 0){
+                    option.series.splice(index,1)
+                }
+                option.series.push( {
+                    name: '传统蚁群',
+                    type: 'scatter',
+                    large: true,
+                    symbolSize: 3,
+                    data: result
+                })
+                myChart.setOption(option)
+            },
+            error: function (data) {
+                alert("请求出错");
+            }
+        });
+    });
+
+    $("#mmas").click(function () {
+        console.log(option.series);
+        $.ajax({
+            url: "/tsp/mmas",
+            dataType: "json",
+            type: "post",
+
+            success: function (result) {
+                var index = -1;
+                for (let i = 0; i < option.series.length; i++) {
+                    if (option.series[i].name === '最大最小蚁群') {
+                        index = i;
+                    }
+                }
+                if (index >= 0){
+                    option.series.splice(index,1)
+                }
+                option.series.push( {
+                    name: '最大最小蚁群',
+                    type: 'scatter',
+                    large: true,
+                    symbolSize: 3,
+                    data: result
+                })
                 myChart.setOption(option)
             },
             error: function (data) {

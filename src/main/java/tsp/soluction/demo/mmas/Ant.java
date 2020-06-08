@@ -1,4 +1,6 @@
 package tsp.soluction.demo.mmas;
+import tsp.soluction.demo.gaaa.DistanceUtil;
+
 import java.util.*;
 
 /**
@@ -90,10 +92,11 @@ public class Ant {
             path.add(currentCity);
         }
         roadLength = 0;
-        for (int i = 1; i < tabu.size(); i++) {
-            roadLength += City.getDistance(tabu.get(i-1), tabu.get(i));
-        }
-        roadLength += City.getDistance(currentCity, tabu.get(0));
+        roadLength = DistanceUtil.getDistance(tabu.toArray(new Integer[cityNum]));
+//        for (int i = 1; i < tabu.size(); i++) {
+//            roadLength += City.getDistance(tabu.get(i-1), tabu.get(i));
+//        }
+//        roadLength += City.getDistance(currentCity, tabu.get(0));
     }
 
     public double getRoadLength() {

@@ -2,6 +2,7 @@ package tsp.soluction.demo.mmas;
 
 
 import org.springframework.util.StopWatch;
+import tsp.soluction.demo.gaaa.DistanceUtil;
 
 import java.util.*;
 
@@ -20,7 +21,7 @@ public class MaasMain {
 
     private City initCity;
     private int cityNum = 30;
-    private int p = 400;//迭代次数
+    private int p = 300;//迭代次数
     private int antNum = 30;
     private Ant[] ants;
 
@@ -50,6 +51,8 @@ public class MaasMain {
      * 迭代结束
      */
     public void run() {
+
+        DistanceUtil.initDistance(cityNum);
         initDistance();
         for (int i = 0; i < p; i++) {//一次迭代即更新了一次解空间
             System.out.println("第" + i + "次迭代：");
@@ -98,11 +101,7 @@ public class MaasMain {
     private void findBestRoad(double iterationTime) {
         iterationBestLen = Double.MAX_VALUE;
         for (int i = 0; i < antNum; i++) {
-            ArrayList antFootprint = new ArrayList();
-            antFootprint.add(iterationTime);
-            antFootprint.add(ants[i].getRoadLength());
-            // 用于记录所有的蚂蚁的行走次数
-            result.add(antFootprint);
+
             double currentLen = ants[i].getRoadLength();
             // 更新最优解的结果
             if (bestLength > currentLen) {
@@ -117,6 +116,11 @@ public class MaasMain {
                 iterationBestPath = ants[i].getPath();
             }
         }
+        ArrayList antFootprint = new ArrayList();
+        antFootprint.add(iterationTime);
+        antFootprint.add(bestLength);
+        // 用于记录所有的蚂蚁的行走次数
+        result.add(antFootprint);
         System.out.println("当前迭代最优解长度是"+ iterationBestLen);
         System.out.println("当前最优解长度是"+ bestLength +",路径为是：" + bestTourStr);
     }
