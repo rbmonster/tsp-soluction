@@ -26,3 +26,9 @@ https://baike.baidu.com/item/%E8%9A%81%E7%BE%A4%E7%B3%BB%E7%BB%9F/20868488?fr=al
 https://blog.csdn.net/zuochao_2013/article/details/71872950
 - 调参研究
 https://blog.csdn.net/georgesale/article/details/80466909
+
+
+
+https://www.ixueshu.com/document/c2ce2a60dbe1de5d542553fa5fbc246c318947a18e7f9386.html
+
+https://www.ixueshu.com/document/214c9856c461100722e7ebd48d8a8032318947a18e7f9386.html
