@@ -1,4 +1,4 @@
-package tsp.soluction.demo.mmas;
+package tsp.soluction.demo.gammas;
 
 import java.util.List;
 import java.util.Random;
@@ -14,7 +14,7 @@ import java.util.Random;
  * @Author: sanwu
  * @Date: 2020/5/17 13:19
  */
-public class City {
+public class GaCity {
     // 城市距离
     private static double distance[][];
     // 信息素
@@ -39,7 +39,7 @@ public class City {
     // 一次找到最优路径的概率
     private static double pBest = 0.05;
 
-    public City(int cityNum, boolean symmetryFlag, double alpha, double beta, double rho, double initPheromone) {
+    public GaCity(int cityNum, boolean symmetryFlag, double alpha, double beta, double rho, double initPheromone) {
         this.alpha = alpha;
         this.beta = beta;
         this.rho = rho;
@@ -72,14 +72,14 @@ public class City {
      *        n√pbest 为 pbest开根号  n为城市数量
      *        avg = n/2  每次蚂蚁必须在avg = n / 2解决方案中进行选择，论文中假定的参数
      *
-     * @param iterationBestAnt
+     * @param iterationBestGaAnt
      */
-    public void updatePheromone(Ant iterationBestAnt) {
-        List<Integer> bestPath = iterationBestAnt.getPath();
+    public void updatePheromone(GaAnt iterationBestGaAnt) {
+        List<Integer> bestPath = iterationBestGaAnt.getPath();
 
         double [][] addPheromone  = new double[cityNum][cityNum];
         // 信息素增量
-        double pheAdd = 1/iterationBestAnt.getRoadLength();
+        double pheAdd = 1/ iterationBestGaAnt.getRoadLength();
         for (int i = 1; i < bestPath.size(); i++) {
             int start = bestPath.get(i-1);
             int end = bestPath.get(i);
@@ -94,7 +94,7 @@ public class City {
                 pheromone[i][j] = pheromone[i][j] * rho+ addPheromone[i][j];
             }
         }
-        double maxPheromone=1.0/(MmasMain.bestLength *(1.0-rho));
+        double maxPheromone=1.0/(Gammas.bestLength *(1.0-rho));
         double minPheromone=maxPheromone*mmRate;
         for (int i = 0; i < cityNum; i++) {
             for (int j = 0; j < cityNum; j++) {

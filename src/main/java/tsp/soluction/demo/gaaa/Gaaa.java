@@ -214,6 +214,7 @@ public class Gaaa {
                 cutPointHigh = random.nextInt(cityNum - 1);
             }
             GaaaUtil.crossMapping(child1.getRoad(), child2.getRoad(), cutPointLow, cutPointHigh);
+//            GaaaUtil.cross(child1.getRoad(), child2.getRoad(), cutPointLow, cutPointHigh);
             newChromosomes.add(child1);
             newChromosomes.add(child2);
         }

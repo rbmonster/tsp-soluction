@@ -11,12 +11,13 @@
 <button type="button" name="ga" id="ga">遗传算法执行</button>
 <button type="button" name="as" id="as">蚁群算法执行</button>
 <button type="button" name="mmas" id="mmas">最大最小蚁群算法执行</button>
+<button type="button" name="gammas" id="gammas">遗传混合蚁群算法执行</button>
 <div id="chart" style="width: 100%;height:400px;"></div>
 </body>
 <script type="text/javascript">
     var option = {
         title: {
-            text: '基于蚁群算法的负载均衡调度策略'
+            text: '算法应用'
         },
         tooltip: {
             trigger: 'axis',
@@ -32,7 +33,7 @@
             zlevel: 1
         },
         legend: {
-            data: ['传统蚁群','遗传算法', '最大最小蚁群']
+            data: ['传统蚁群','遗传算法', '最大最小蚁群','遗传混合蚁群']
         },
         toolbox: {
             show: true,
@@ -61,21 +62,28 @@
         series: [
             {
                 name: '传统蚁群',
-                type: 'scatter',
+                type: 'line',
                 large: true,
                 symbolSize: 3,
                 data: ['12', '32', '45', '78', '60']
             },
             {
                 name: '遗传算法',
-                type: 'scatter',
+                type: 'line',
                 large: true,
                 symbolSize: 3,
                 data: ['12', '32', '45', '78', '60']
             },
             {
                 name: '最大最小蚁群',
-                type: 'scatter',
+                type: 'line',
+                large: true,
+                symbolSize: 3,
+                data: ['12', '32', '45', '78', '60']
+            },
+            {
+                name: '遗传混合蚁群',
+                type: 'line',
                 large: true,
                 symbolSize: 3,
                 data: ['12', '32', '45', '78', '60']
@@ -127,7 +135,7 @@
                 }
                 option.series.push( {
                     name: '遗传算法',
-                    type: 'scatter',
+                    type: 'line',
                     large: true,
                     symbolSize: 3,
                     data: result
@@ -159,7 +167,7 @@
                 }
                 option.series.push( {
                     name: '传统蚁群',
-                    type: 'scatter',
+                    type: 'line',
                     large: true,
                     symbolSize: 3,
                     data: result
@@ -191,7 +199,38 @@
                 }
                 option.series.push( {
                     name: '最大最小蚁群',
-                    type: 'scatter',
+                    type: 'line',
+                    large: true,
+                    symbolSize: 3,
+                    data: result
+                })
+                myChart.setOption(option)
+            },
+            error: function (data) {
+                alert("请求出错");
+            }
+        });
+    });
+    $("#gammas").click(function () {
+        console.log(option.series);
+        $.ajax({
+            url: "/tsp/gammas",
+            dataType: "json",
+            type: "post",
+
+            success: function (result) {
+                var index = -1;
+                for (let i = 0; i < option.series.length; i++) {
+                    if (option.series[i].name === '遗传混合蚁群') {
+                        index = i;
+                    }
+                }
+                if (index >= 0){
+                    option.series.splice(index,1)
+                }
+                option.series.push( {
+                    name: '遗传混合蚁群',
+                    type: 'line',
                     large: true,
                     symbolSize: 3,
                     data: result

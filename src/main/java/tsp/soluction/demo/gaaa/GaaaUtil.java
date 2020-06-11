@@ -49,19 +49,64 @@ public class GaaaUtil {
      * @param cutPointHigh
      */
     public static void crossMapping( Integer[] papaRoad,  Integer[] mamaRoad, int cutPointLow, int cutPointHigh) {
-//        Integer[] papaRoad = papa.getRoad();
-//        Integer[] mamaRoad = mama.getRoad();
         LinkedHashMap<Integer, Integer> papaMapping = new LinkedHashMap<>();
         LinkedHashMap<Integer, Integer> mamaMapping = new LinkedHashMap<>();
+        List<Integer>papaList = new ArrayList<>(Arrays.asList(papaRoad));
+        List<Integer>mamaList = new ArrayList<>(Arrays.asList(mamaRoad));
         for (int i = cutPointLow; i <= cutPointHigh; i++) {
             mamaMapping.put(papaRoad[i], mamaRoad[i]);
             papaMapping.put(mamaRoad[i], papaRoad[i]);
-            Integer tmp = papaRoad[i];
-            papaRoad[i] = mamaRoad[i];
-            mamaRoad[i] = tmp;
         }
-        crossMapping(papaRoad, papaMapping, cutPointLow, cutPointHigh);
-        crossMapping(mamaRoad, mamaMapping, cutPointLow, cutPointHigh);
+        for (int i = cutPointHigh; i >= cutPointLow ; i--) {
+            papaList.remove(i);
+            mamaList.remove(i);
+        }
+        for (Integer tmp : papaMapping.keySet()){
+            papaList.add(tmp);
+        }
+        for (Integer tmp : mamaMapping.keySet()){
+            mamaList.add(tmp);
+        }
+        for (int i = 0; i < papaRoad.length; i++) {
+            papaRoad[i] = papaList.get(i);
+            mamaRoad[i] = mamaList.get(i);
+        }
+        int mappingIndex = papaRoad.length - cutPointHigh + cutPointLow - 1;
+        crossMapping(papaRoad, papaMapping, mappingIndex, papaRoad.length);
+        crossMapping(mamaRoad, mamaMapping, mappingIndex, papaRoad.length);
+    }
+
+    public static void cross( Integer[] papaRoad,  Integer[] mamaRoad, int cutPointLow, int cutPointHigh) {
+        LinkedHashMap<Integer, Integer> papaMapping = new LinkedHashMap<>();
+        LinkedHashMap<Integer, Integer> mamaMapping = new LinkedHashMap<>();
+
+        List<Integer> newPapaList = new ArrayList<>();
+        List<Integer> newMamaList = new ArrayList<>();
+        List<Integer> restPapaList = new ArrayList<>(Arrays.asList(papaRoad));
+        List<Integer> restMamaList = new ArrayList<>(Arrays.asList(mamaRoad));
+        for (int i = cutPointLow; i <= cutPointHigh; i++) {
+            mamaMapping.put(papaRoad[i], mamaRoad[i]);
+            papaMapping.put(mamaRoad[i], papaRoad[i]);
+            newPapaList.add(mamaRoad[i]);
+            newMamaList.add(papaRoad[i]);
+        }
+        int newLen = newMamaList.size();
+//        for (int i = cutPointHigh; i >= cutPointLow ; i--) {
+//            restPapaList.remove(i);
+//            restMamaList.remove(i);
+//        }
+        newPapaList.addAll(restPapaList);
+        newMamaList.addAll(restMamaList);
+        for (int i = newPapaList.size()-1; i >= newLen; i--) {
+            if (papaMapping.keySet().contains(newPapaList.get(i))){
+                newPapaList.remove(i);
+            }
+            if (mamaMapping.keySet().contains(newMamaList.get(i))){
+                newMamaList.remove(i);
+            }
+        }
+        newMamaList.toArray(mamaRoad);
+        newPapaList.toArray(papaRoad);
     }
 
     /**

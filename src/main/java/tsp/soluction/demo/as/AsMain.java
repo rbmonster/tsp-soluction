@@ -39,7 +39,7 @@ public class AsMain {
     // 信息素的量
     private double initPheromone = 1000;
     private Integer bestAntIndex = -1;
-    public Set<ArrayList> result = new HashSet<>();
+    public List<ArrayList> result = new ArrayList<>();
     public List<Integer> bestPath = new LinkedList<>();
 
     public static void main(String[] args) {

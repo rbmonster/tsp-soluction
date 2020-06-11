@@ -1,6 +1,8 @@
 package tsp.soluction.demo.mmas;
 
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.util.StopWatch;
 import tsp.soluction.demo.gaaa.DistanceUtil;
 
@@ -17,12 +19,14 @@ import java.util.*;
  * @Author: sanwu
  * @Date: 2020/5/17 13:25
  */
-public class MaasMain {
+@Getter
+@Setter
+public class MmasMain {
 
     private City initCity;
     private int cityNum = 30;
     private int p = 300;//迭代次数
-    private int antNum = 30;
+    private int antNum = 50;
     private Ant[] ants;
 
     // 信息启发因子
@@ -36,14 +40,14 @@ public class MaasMain {
     public static double bestLength = Double.MAX_VALUE;
     private String bestTourStr = "";
     public List<Integer> bestPath = new LinkedList<>();
-    public Set<ArrayList> result = new HashSet<>();
+    public List<ArrayList> result = new ArrayList<>();
     // 迭代最优的蚂蚁索引ID
     private Integer iterationBestIndex = -1;
     public double iterationBestLen = Double.MAX_VALUE;
     public List<Integer> iterationBestPath = new LinkedList<>();
 
     public static void main(String[] args) {
-        MaasMain main = new MaasMain();
+        MmasMain main = new MmasMain();
         main.run();
     }
 
@@ -130,13 +134,6 @@ public class MaasMain {
         initCity.updatePheromone(ants[iterationBestIndex]);
     }
 
-    public Set<ArrayList> getResult() {
-        return result;
-    }
-
-    public void setResult(Set<ArrayList> result) {
-        this.result = result;
-    }
     //
 //    private City initCity;
 //    private int cityNum = 30;

@@ -5,7 +5,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import tsp.soluction.demo.as.AsMain;
 import tsp.soluction.demo.gaaa.Gaaa;
-import tsp.soluction.demo.mmas.MaasMain;
+import tsp.soluction.demo.gammas.Gammas;
+import tsp.soluction.demo.mmas.MmasMain;
 
 /**
  * <pre>
@@ -38,8 +39,15 @@ public class TspController {
 
     @PostMapping("/mmas")
     public Object getMmas(){
-        MaasMain maasMain =new MaasMain();
-        maasMain.run();
-        return maasMain.getResult();
+        MmasMain mmasMain =new MmasMain();
+        mmasMain.run();
+        return mmasMain.getResult();
+    }
+
+    @PostMapping("/gammas")
+    public Object getGammas(){
+        Gammas gammas =new Gammas();
+        gammas.run();
+        return gammas.getResult();
     }
 }
