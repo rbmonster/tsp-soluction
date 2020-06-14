@@ -4,12 +4,10 @@ package tsp.soluction.demo.gammas;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.util.StopWatch;
-import tsp.soluction.demo.gaaa.Chromosome;
-import tsp.soluction.demo.gaaa.DistanceUtil;
-import tsp.soluction.demo.gaaa.GaaaUtil;
+import tsp.soluction.demo.util.DistanceUtil;
+import tsp.soluction.demo.ga.GaUtil;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * <pre>
@@ -29,7 +27,7 @@ public class Gammas {
     private GaCity initCity;
     private int cityNum = 30;
     private int p = 300;//迭代次数
-    private int antNum = 50;
+    private int antNum = 30;
     private GaAnt[] gaAnts;
 
     //变异概率
@@ -56,7 +54,8 @@ public class Gammas {
     public double iterationBestLen = Double.MAX_VALUE;
     public List<Integer> iterationBestPath = new LinkedList<>();
     private double[] survivalProb;
-
+    private long costTime;
+    private long iterationTime= 0;
     private List<GaAnt> newAnts = new ArrayList<>();
 
     public static void main(String[] args) {
@@ -68,14 +67,14 @@ public class Gammas {
      * 迭代结束
      */
     public void run() {
-
-        DistanceUtil.initDistance(cityNum);
         initDistance();
+
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         for (int i = 0; i < p; i++) {//一次迭代即更新了一次解空间
             System.out.println("第" + i + "次迭代：");
             initAnts();
             movetoNextCity();
-            findBestRoad(i);
             calculateProb();
             mating();
             mutation();
@@ -83,6 +82,9 @@ public class Gammas {
             findBestRoad(i);
             updatePheromone();
         }
+        stopWatch.stop();
+        costTime = stopWatch.getTotalTimeMillis();
+//        bestLength = Double.MAX_VALUE;
     }
 
     private void calculateProb(){
@@ -138,7 +140,7 @@ public class Gammas {
      * 记录当前最好解
      * 使用全局最优解进行 信息素更新
      */
-    private void findBestRoad(double iterationTime) {
+    private void findBestRoad(Integer iterationTime) {
         iterationBestLen = Double.MAX_VALUE;
         for (int i = 0; i < antNum; i++) {
 
@@ -158,7 +160,8 @@ public class Gammas {
         }
         ArrayList antFootprint = new ArrayList();
         antFootprint.add(iterationTime);
-        antFootprint.add(bestLength);
+//        antFootprint.add(bestLength);
+        antFootprint.add(Double.valueOf(String.format("%.2f",bestLength)));
         // 用于记录所有的蚂蚁的行走次数
         result.add(antFootprint);
         System.out.println("当前迭代最优解长度是"+ iterationBestLen);
@@ -202,7 +205,7 @@ public class Gammas {
 
             Integer[] road2 = new Integer[cityNum];
             child2.getPath().toArray(road2);
-            GaaaUtil.crossMapping(road1, road2, cutPointLow, cutPointHigh);
+            GaUtil.crossMapping(road1, road2, cutPointLow, cutPointHigh);
 //            GaaaUtil.cross(road1, road2, cutPointLow, cutPointHigh);
             child1.setPath(Arrays.asList(road1));
             child2.setPath(Arrays.asList(road2));

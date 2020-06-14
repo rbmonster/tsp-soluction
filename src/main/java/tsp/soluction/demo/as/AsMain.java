@@ -26,6 +26,7 @@ public class AsMain {
     private int cityNum = 30;
     private int p = 300;//迭代次数
     private double bestLength;
+    private long costTime;
     private String bestTourStr;
     private int antNum = 100;
     private AsAnt[] ants;
@@ -41,6 +42,7 @@ public class AsMain {
     private Integer bestAntIndex = -1;
     public List<ArrayList> result = new ArrayList<>();
     public List<Integer> bestPath = new LinkedList<>();
+    private long iterationTime = 0;
 
     public static void main(String[] args) {
         AsMain main = new AsMain();
@@ -53,22 +55,28 @@ public class AsMain {
     public void run() {
         initDistance();
         initParas();
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         for (int i = 0; i < p; i++) {//一次迭代即更新了一次解空间
             System.out.println("第" + i + "次迭代：");
             initAnts();
             movetoNextCity();
             findBestRoad();
             updatePheromone();
+            //保存当前迭代结果
             ArrayList preResult = new ArrayList();
             preResult.add(i);
-            preResult.add(bestLength);
+            preResult.add(Double.valueOf(String.format("%.2f", bestLength)));
             result.add(preResult);
         }
+        stopWatch.stop();
+        costTime = stopWatch.getTotalTimeMillis();
+        System.out.println(costTime);
     }
 
     //初始化城市信息，假设为非对称TSP问题
     private void initDistance() {
-        initCity = new AsCity(cityNum, false ,alpha, beta, rho, initPheromone);
+        initCity = new AsCity(cityNum, alpha, beta, rho, initPheromone);
     }
 
     //参数初始化
@@ -100,7 +108,7 @@ public class AsMain {
             ants[i].chooseNextCity();
         }
         watch.stop();
-        System.out.println("寻找城市耗时！" + watch.getTotalTimeMillis()/ 1000 +"s");
+        System.out.println("寻找城市耗时！" + watch.getTotalTimeMillis() / 1000 + "s");
     }
 
     /**

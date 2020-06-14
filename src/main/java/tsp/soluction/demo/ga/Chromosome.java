@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tsp.soluction.demo.gaaa;
+package tsp.soluction.demo.ga;
 
 import lombok.Getter;
 import lombok.Setter;
+import tsp.soluction.demo.util.DistanceUtil;
 
 import java.util.*;
 
@@ -45,9 +46,7 @@ public class Chromosome {
     }
 
     public double getRoadLength(){
-//        if (roadLength <= 0){
-            roadLength = DistanceUtil.getDistance(road);
-//        }
+        roadLength = DistanceUtil.getDistance(road);
         return roadLength;
     }
 

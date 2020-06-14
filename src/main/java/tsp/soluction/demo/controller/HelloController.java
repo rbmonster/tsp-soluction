@@ -1,4 +1,4 @@
-package tsp.soluction.demo;
+package tsp.soluction.demo.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 /**
  * <pre>
  * @Description:
- * TODO
+ *  首页地址：
+ *  http://localhost:9999/home
  * </pre>
  *
  * @version v1.0
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @Date: 2020/5/16 19:31
  */
 @Controller
-@RequestMapping(value = "/hello")
+@RequestMapping
 public class HelloController {
     @RequestMapping(value = "/home")
     public String hello(Model model) {

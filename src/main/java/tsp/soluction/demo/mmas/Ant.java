@@ -1,5 +1,5 @@
 package tsp.soluction.demo.mmas;
-import tsp.soluction.demo.gaaa.DistanceUtil;
+import tsp.soluction.demo.util.DistanceUtil;
 
 import java.util.*;
 

@@ -3,15 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tsp.soluction.demo.gaaa;
+package tsp.soluction.demo.ga;
 
 import lombok.Getter;
 import lombok.Setter;
+import tsp.soluction.demo.util.DistanceUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * 遗传算法
@@ -20,7 +18,7 @@ import java.util.Random;
  */
 @Getter
 @Setter
-public class Gaaa {
+public class Ga {
 
     //种群规模
     private int chromosomeSize = 100;
@@ -30,7 +28,7 @@ public class Gaaa {
     private double mutationProb = 0.10;
     private double mutationNum;
     //交配概率
-    private double matingProb = 0.80;
+    private double matingProb = 0.90;
     private int matingNum;
     //城市数量
     private int cityNum = 30;
@@ -48,38 +46,33 @@ public class Gaaa {
 
     private ArrayList<ArrayList> result = new ArrayList<ArrayList>();
 
-    public Gaaa() {
+    public Ga() {
     }
 
-    public Gaaa(int chromosomeSize, int cityNum) {
+    public Ga(int chromosomeSize, int cityNum) {
         this.chromosomeSize = chromosomeSize;
         this.cityNum = cityNum;
     }
 
-    public static void main(String[] args) {
-//        double[][] defaultInitRoad = getDistance();
-        //打印适应度最高的解
-        Gaaa ga = new Gaaa();
-        ga.run();
-        System.out.println(ga.getResult());
-    }
-
+    /**
+     * 主流程
+     */
     public void run() {
         initDistance();
         initChromosome();
-//        Integer[] integers = {21,5,3,29,27,22,25,1,11,24,4,7,9,2,20,15,19,16,6,10,14,12,18,8,26,0,23,28,13,17,};
-//        chromosomes[0].setRoad(integers);
         for (int i = 0; i < p; i++) {
             System.out.println("第" + i + "次迭代：");
             calAdaptabilityAndLucky(i);
             chooseBestSolution();
             List<Chromosome> superList = copyBestGeneration();
-            mating();
-            mutation();
+            expMating();
+            reverseMutation();
             copyGeneration(superList);
+            // 记录本轮最优解
             ArrayList ablity = new ArrayList();
             ablity.add(i);
-            ablity.add(bestRoadLen-200);
+//            ablity.add(bestRoadLen);
+            ablity.add(Double.valueOf(String.format("%.2f",bestRoadLen)));
             result.add(ablity);
         }
         System.out.println("最低消耗：" + bestRoadLen);
@@ -87,11 +80,12 @@ public class Gaaa {
 
     /**
      * 获取优秀的染色体
+     *
      * @return
      */
-    private List<Chromosome>  copyBestGeneration() {
+    private List<Chromosome> copyBestGeneration() {
         int superNum = chromosomeSize - matingNum;
-        List<Chromosome> superList = GaaaUtil.findBestNIndex(survivalProb, chromosomes, superNum);
+        List<Chromosome> superList = GaUtil.findBestNIndex(survivalProb, chromosomes, superNum);
         return superList;
     }
 
@@ -100,12 +94,6 @@ public class Gaaa {
      * 复制染色体新生代
      */
     private void copyGeneration(List<Chromosome> superList) {
-//        for (int i = newChromoIndex+1, j = 0; i < chromosomeSize && j < superList.size(); i++,j++) {
-//            newChromosomes = superList.get(j);
-//        }
-//        chromosomes = newChromosomes;
-//        newChromosomes = new Chromosome[chromosomeSize];
-//        newChromoIndex = -1;
         newChromosomes.addAll(superList);
         if (newChromosomes.size() != chromosomeSize) {
             throw new RuntimeException("数量error ~~~~~~~~~");
@@ -115,7 +103,6 @@ public class Gaaa {
         }
         newChromosomes.clear();
     }
-
 
 
     /**
@@ -130,6 +117,10 @@ public class Gaaa {
         }
     }
 
+    /**
+     * 初始化染色体
+     * 初始化一些变量
+     */
     private void initChromosome() {
         chromosomes = new Chromosome[chromosomeSize];
         newChromosomes = new ArrayList<>(chromosomeSize);
@@ -144,7 +135,7 @@ public class Gaaa {
         if (matingNum % 2 != 0) {
             matingNum--;
         }
-        mutationNum = (int) Math.round(chromosomeSize*mutationProb);
+        mutationNum = (int) Math.round(chromosomeSize * mutationProb);
     }
 
     /**
@@ -153,14 +144,6 @@ public class Gaaa {
      */
     //计算染色体适应度值(每个染色体的路径总和）和幸存程度
     private void calAdaptabilityAndLucky(int time) {
-//        for (int i = 0; i < chromosomeSize; i++) {
-//            double tmp = chromosomes[i].getRoadLength();
-//            // 用于记录执行结果
-//            ArrayList ablity = new ArrayList();
-//            ablity.add(time);
-//            ablity.add(tmp);
-//            result.add(ablity);
-//        }
         Double allAbility = 0.0;
         // 计算适应度
         for (int i = 0; i < chromosomeSize; i++) {
@@ -195,9 +178,12 @@ public class Gaaa {
 
     /**
      * 染色体交配
+     * 部分匹配法交叉
+     *
+     *
      */
-    private void mating() {
-        for (int i = 0; i < matingNum; i+=2 ) {
+    private void expMating() {
+        for (int i = 0; i < matingNum; i += 2) {
             // 取两个不同的父 染色体
             int papaIndex = rouletteSelectionMethod();
             int mamaIndex = rouletteSelectionMethod();
@@ -213,8 +199,7 @@ public class Gaaa {
             while (cutPointHigh == cutPointLow) {
                 cutPointHigh = random.nextInt(cityNum - 1);
             }
-            GaaaUtil.crossMapping(child1.getRoad(), child2.getRoad(), cutPointLow, cutPointHigh);
-//            GaaaUtil.cross(child1.getRoad(), child2.getRoad(), cutPointLow, cutPointHigh);
+            GaUtil.crossMapping(child1.getRoad(), child2.getRoad(), cutPointLow, cutPointHigh);
             newChromosomes.add(child1);
             newChromosomes.add(child2);
         }
@@ -236,15 +221,10 @@ public class Gaaa {
             }
             Chromosome mutationSample1 = newChromosomes.get(chromosomeIndex1);
             Chromosome mutationSample2 = newChromosomes.get(chromosomeIndex2);
-//            int mutationIndex = random.nextInt(mutationSample1.getCityNum() - 1);
-//            Integer[] mutationRoad1 = mutationSample1.getRoad();
-//            Integer[] mutationRoad2 = mutationSample2.getRoad();
-//            changeRoadIndex(mutationRoad1, mutationIndex, mutationRoad2[mutationIndex]);
-//            changeRoadIndex(mutationRoad2, mutationIndex, mutationRoad1[mutationIndex]);
             int mutationIndex1 = random.nextInt(cityNum - 1);
-            int mutationIndex2 =  random.nextInt(cityNum - 1);
+            int mutationIndex2 = random.nextInt(cityNum - 1);
             while (mutationIndex1 == mutationIndex2) {
-                mutationIndex2 =  random.nextInt(cityNum - 1);
+                mutationIndex2 = random.nextInt(cityNum - 1);
             }
             Integer[] road = mutationSample1.getRoad();
             int tmp = road[mutationIndex1];
@@ -254,7 +234,48 @@ public class Gaaa {
     }
 
     /**
+     * 倒位变异
+     */
+    private void reverseMutation() {
+        Random random = new Random();
+        int currentSize = newChromosomes.size();
+        for (int i = 0; i < mutationNum; i++) {
+            // 随机找两条染色体
+            int chromosomeIndex1 = random.nextInt(currentSize);
+            Chromosome mutationSample1 = chromosomes[chromosomeIndex1];
+            int tryNum = 0;
+            while (tryNum <= 10) {
+                tryNum++;
+                int mutationIndex1 = random.nextInt(cityNum - 1);
+                int mutationIndex2 = random.nextInt(cityNum - 1);
+                while (mutationIndex1 == mutationIndex2) {
+                    mutationIndex2 = random.nextInt(cityNum - 1);
+                }
+                if (mutationIndex1 > mutationIndex2) {
+                    int tmp = mutationIndex1;
+                    mutationIndex1 = mutationIndex2;
+                    mutationIndex2 = tmp;
+                }
+                Integer[] road = mutationSample1.getRoad();
+                Integer[] subRoad = Arrays.copyOfRange(road, mutationIndex1, mutationIndex2);
+                double oriLen = DistanceUtil.getDistance(subRoad);
+                List<Integer> oriList = new ArrayList<>(Arrays.asList(subRoad));
+                Collections.reverse(oriList);
+                double newLen = DistanceUtil.getDistance(oriList);
+                if (oriLen > newLen) {
+                    for (int j = mutationIndex1, k = mutationIndex2; j<k; j++, k--) {
+                        int tmp = road[j];
+                        road[j] = road[k];
+                        road[k] = tmp;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * 找到染色体路径中，相同的城市的索引，进行交换
+     *
      * @param road
      * @param index
      * @param newValue
@@ -304,5 +325,10 @@ public class Gaaa {
             }
         }
         return returnIndex == -1 ? rouletteSelectionMethod() : returnIndex;
+    }
+
+    public static void main(String[] args) {
+        Ga gaaa = new Ga();
+        gaaa.run();
     }
 }

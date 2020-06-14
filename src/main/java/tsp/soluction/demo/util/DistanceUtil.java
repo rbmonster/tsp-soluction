@@ -1,245 +1,55 @@
-package tsp.soluction.demo.gammas;
-
-import tsp.soluction.demo.util.DistanceUtil;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package tsp.soluction.demo.util;
 
 import java.util.List;
 import java.util.Random;
 
 /**
- * <pre>
- * @Description:
- * TODO
- * </pre>
+ * 城市距离类，保存城市间的距离，初始化后不再改变
  *
- * @version v1.0
- * @ClassName: City
- * @Author: sanwu
- * @Date: 2020/5/17 13:19
+ * @author weangdan
  */
-public class GaCity {
-    // 城市距离
+public class DistanceUtil {
+
     private static double distance[][];
-    // 信息素
-    private static double pheromone[][];
-    // 根据信息素计算的概率函数
-    private static double prob[][];
-    // 蚂蚁选择函数公式的固定变量，根据距离计算(1/dij)^beta
-    private static double distanceBeta[][];
-    private static int cityNum;
+    private static int num;
     Random random = new Random();
-    // 信息启发因子
-    private double alpha;
-    // 信息期望启发因子
-    private double beta ;
-    // 信息挥发因子
-    private double rho;
-    // 信息素大小
-    private double initPheromone;
-    // 最大最小信息素的比例
-    private double mmRate;
+    private int min = 2;
+    private int max = 100;
 
-    // 一次找到最优路径的概率
-    private static double pBest = 0.05;
-
-    public GaCity(int cityNum, boolean symmetryFlag, double alpha, double beta, double rho, double initPheromone) {
-        this.alpha = alpha;
-        this.beta = beta;
-        this.rho = rho;
-        this.initPheromone = initPheromone;
-        this.cityNum = cityNum;
-        initDistance(symmetryFlag);
-        initPheromone();
-        initMmasParameter();
+    public DistanceUtil(int num, boolean ifDuichen) {
+        this.num = num;
+        initDistance(num);
     }
 
-    private void initMmasParameter(){
-//        double tmp = Math.exp(Math.log(pBest)/ cityNum);
-//        // 最大最小值之间的比例
-//        mmRate =(2/tmp-2)/(cityNum -2);
-        double tmp = Math.pow(pBest, 1/cityNum);
-        mmRate = (1 - tmp)/((cityNum/2 -1)*tmp);
-    }
-
-    /**
-     * 最大最小蚂蚁算法的信息素更新仅适用最优的路径进行更新
-     * 更新的策略：
-     * 1.选择全局最优路径进行信息素更新   会发生过早收敛的问题
-     * 2.选择单次迭代最优路径进行信息素更新
-     * 3.混合全局最优和 单次迭代最优路径进行更新
-     *
-     * 最大最小信息素说明：
-     * 1. τmax = [1/(1-rho)] * [1/path]   其中path为全局最优路径的蚂蚁的行走长度
-     * 2. τmin = τmax*(1- n√pbest) /[( avg -1)*n√pbest]
-     *     其中pbest 蚂蚁在一次搜索就找到最优路径的概率，该参数为一开始假定的参数
-     *        n√pbest 为 pbest开根号  n为城市数量
-     *        avg = n/2  每次蚂蚁必须在avg = n / 2解决方案中进行选择，论文中假定的参数
-     *
-     * @param iterationBestGaAnt
-     */
-    public void updatePheromone(GaAnt iterationBestGaAnt) {
-        List<Integer> bestPath = iterationBestGaAnt.getPath();
-
-        double [][] addPheromone  = new double[cityNum][cityNum];
-        // 信息素增量
-        double pheAdd = 1/ iterationBestGaAnt.getRoadLength();
-        for (int i = 1; i < bestPath.size(); i++) {
-            int start = bestPath.get(i-1);
-            int end = bestPath.get(i);
-            addPheromone[start][end] +=pheAdd;
-        }
-        // 最后城市到第一个城市
-        int start = bestPath.get(bestPath.size()-1);
-        int end = bestPath.get(0);
-        addPheromone[start][end] +=pheAdd;
-        for (int i = 0; i < cityNum; i++) {
-            for (int j = 0; j < cityNum; j++) {
-                pheromone[i][j] = pheromone[i][j] * rho+ addPheromone[i][j];
-            }
-        }
-        double maxPheromone=1.0/(Gammas.bestLength *(1.0-rho));
-        double minPheromone=maxPheromone*mmRate;
-        for (int i = 0; i < cityNum; i++) {
-            for (int j = 0; j < cityNum; j++) {
-                if (pheromone[i][j] > maxPheromone){
-                    pheromone[i][j] = maxPheromone;
-                }
-                if (pheromone[i][j] < minPheromone){
-                    pheromone[i][j] = minPheromone;
-                }
-            }
-        }
-
-        for (int i = 0; i < cityNum; i++) {
-            for (int j = 0; j < cityNum; j++) {
-//                if (i == j) {
-//                    pheromone[i][j] = 0;
-//                    continue;
-//                }
-                prob[i][j] = Math.pow(pheromone[i][j], alpha) * distanceBeta[i][j];
-            }
-        }
-    }
-
-
-    private void initDistance(boolean symmetryFlag) {
-        distance = DistanceUtil.initDistance(cityNum);
-        distanceBeta = new double[cityNum][cityNum];
-        for (int i = 0; i < cityNum; i++) {
-            for (int j = 0; j < cityNum; j++) {
-                distanceBeta[i][j] = Math.pow( 1.0/ distance[i][j], beta);
-            }
-        }
-        printlnDistance();
-    }
-
-    /**
-     * 初始化信息素和概率函数
-     */
-    private void initPheromone() {
-        pheromone = new double[cityNum][cityNum];
-        prob = new double[cityNum][cityNum];
-        for (int i = 0; i < cityNum; i++) {
-            for (int j = 0; j < cityNum; j++) {
-                if (i == j) {
-                    pheromone[i][j] = 0;
-                    continue;
-                }
-                pheromone[i][j] = initPheromone;
-                prob[i][j] = Math.pow(pheromone[i][j], alpha) * distanceBeta[i][j];
-            }
-        }
-    }
-
-    public static double getDistance(int i, int j) { //注意i,j和城市之间的对应关系
-        return distance[i][j];
-    }
-
-    public static double[] getProb(int i) {
-        return prob[i];
-    }
-
-    public static void printlnDistance() {
-        System.out.println("distance is :");
-        System.out.printf("%8s", "");
-        for (int i = 0; i < cityNum; i++) {
-            System.out.printf("%5s", i);
-        }
-        System.out.println();
-        for (int i = 0; i < cityNum; i++) {
-            System.out.printf("%5s", i);
-            for (int j = 0; j < cityNum; j++) {
-                System.out.printf("%5s", (int) distance[i][j]);
-            }
-            System.out.println();
-        }
-    }
-//    // 城市距离
-//    private static double distance[][];
-//    // 信息素
-//    private static double pheromone[][];
-//    // 根据信息素计算的概率函数
-//    private static double prob[][];
-//    // 根据距离计算的概率函数
-//    private static double distanceBeta[][];
-//    private static int cityNum;
-//    Random random = new Random();
-//    private int min = 2;
-//    private int max = 100;
-//    // 信息启发因子
-//    private double alpha = 1.0;
-//    // 信息期望启发因子
-//    private double beta = 2;
-//    // 信息挥发因子
-//    private double rho = 0.95;
-//    // 一次找到最优路径的概率
-//    private static double numBest = 0.05;
-//
-//    // 信息素上限
-//    private double pheromMax = 0;
-//    // 信息素下限
-//    private double pheromMin = 0;
-//    // 最大最小信息素的比例
-//    private double mmRate;
-//
-//    public City(int cityNum, boolean symmetryFlag, double alpha, double beta, double rho) {
-//        this.alpha = alpha;
-//        this.beta = beta;
-//        this.rho = rho;
-//        this.cityNum = cityNum;
-//        initDistance(symmetryFlag);
-//        initPheromone();
-//        initMmasParameter();
-//    }
-//
-//    private void initMmasParameter(){
-//        double tmp = Math.exp(Math.log(numBest)/ cityNum);
-//        // 最大最小值之间的比例
-//        mmRate =(2/tmp-2)/(cityNum -2);
-//    }
-//
-//    private void initDistance(boolean symmetryFlag) {
-////        distance = new double[num][num];
+    public static double[][] initDistance(int cityNum) {
+        num = cityNum;
+//        distance = new double[num][num];
 //        //distance是一个对称阵，且对角元素设为无穷大；对角线元素不会被用到，如果算法正确
-////        for (int i = 0; i < num; i++) {
-////            if (symmetryFlag) {
-////                for (int j = i; j < num; j++) {
-////                    if (i == j) {
-////                        distance[i][j] = 0;
-////                    } else {
-////                        distance[i][j] = distance[j][i] = min + ((max - min) * random.nextDouble()); //产生2-100之间的随机浮点数
-////                    }
-////                }
-////            } else {
-////                for (int j = 0; j < num; j++) {
-////                    if (i == j) {
-////                        distance[i][j] = 0;
-////                    } else {
-////                        distance[i][j] = min + ((max - min) * random.nextDouble()); //产生2-100之间的随机浮点数
-////                    }
-////                }
-////            }
-////        }
-//        int [][] taa = {{123,123},{123,11}};
+//        for (int i = 0; i < num; i++) {
+//            if (ifDuichen) {
+//                for (int j = i; j < num; j++) {
+//                    if (i == j) {
+//                        distance[i][j] = 0;
+//                    } else {
+//                        distance[i][j] = distance[j][i] = min + ((max - min) * random.nextDouble()); //产生2-100之间的随机浮点数
+//                    }
+//                }
+//            } else {
+//                for (int j = 0; j < num; j++) {
+//                    if (i == j) {
+//                        distance[i][j] = Double.MAX_VALUE;
+//                    } else {
+//                        distance[i][j] = min + ((max - min) * random.nextDouble()); //产生2-100之间的随机浮点数
+//                    }
+//                }
+//
+//            }
+//        }
 //        distance = new double[][]{{0.0, 62.688755870316974, 99.89436511341816, 41.89630850035449, 55.364490449768276, 76.4666914372237, 81.03885335195375, 80.22198949566219, 84.31650530983178, 85.57835262526116, 27.878880500789187, 36.7050211664927, 86.88914177279167, 96.38409490113175, 81.82668214369178, 27.26744172489623, 73.93440799566099, 71.84647901799423, 69.611799392534, 31.632382130342265, 32.83000938960603, 76.7595542749642, 94.70014186230357, 7.475660593284674, 16.8974237850573, 63.30046958922474, 47.71866896129891, 60.58775215944333, 52.39570403444055, 65.9049353242746},
 //                {8.952165660354149, 0.0, 17.181406206913913, 47.705348269261776, 58.626291897813694, 25.589946722510426, 76.66969836632704, 14.209101261738226, 32.858557675807525, 41.0740269921114, 16.991226010949344, 7.331677120001479, 78.58715711598926, 13.636813520581999, 45.873647233055536, 13.217970537158894, 44.17662661905514, 13.91501001515386, 84.30365272870273, 91.60936416101065, 80.11284706224298, 43.38790695374147, 42.91099212760944, 46.620355797143624, 83.08806722674535, 54.311935239431335, 45.976050203539906, 46.32278821490471, 96.3501291605989, 21.809817565529514},
 //                {95.33497906680658, 31.31254953128176, 0.0, 96.33308062435216, 75.82133109322805, 15.583344192181388, 63.76368407351687, 24.244520196176524, 76.73416421044918, 36.66863497264903, 95.86744731487632, 94.50570755626649, 43.68708917059777, 50.2140142528372, 92.00888676496848, 73.72374772087522, 70.77402593785285, 45.730114017922226, 26.55113579830219, 58.22075485640594, 5.676409163015426, 8.248599110023294, 74.67769046546712, 75.05321013773069, 23.612589880804073, 25.850728498413716, 5.385474064747886, 14.92536339948988, 72.91682962087167, 28.066079226833825},
@@ -272,115 +82,90 @@ public class GaCity {
 //                {79.94243912370085, 38.939988608394735, 73.57101636708335, 72.93054256915138, 17.96204662247598, 18.11395795811797, 52.46522526144038, 48.756831185793565, 68.20986472688911, 71.42725941796138, 25.602722510846615, 82.07454042247149, 78.05342435989796, 74.31703160735773, 29.645096068081607, 19.409188460997612, 98.96827495312974, 90.01769841644847, 86.419699653143, 37.63675757946513, 36.98317346684174, 20.340673995476255, 10.18714925606984, 60.266475375752506, 59.68472057627968, 19.429371278589404, 24.118475417818306, 11.420634749020508, 45.789352852274504, 0.0},
 //
 //        };
-//        distanceBeta = new double[cityNum][cityNum];
-//        for (int i = 0; i < cityNum; i++) {
-//            for (int j = 0; j < cityNum; j++) {
-//                distanceBeta[i][j] = Math.pow( 1.0/ distance[i][j], beta);
-//            }
-//        }
-//        printlnDistance();
-//    }
-//
-//    /**
-//     * 初始化信息素和概率函数
-//     */
-//    private void initPheromone() {
-//        pheromone = new double[cityNum][cityNum];
-//        prob = new double[cityNum][cityNum];
-//        for (int i = 0; i < cityNum; i++) {
-//            for (int j = 0; j < cityNum; j++) {
-//                if (i == j) {
-//                    pheromone[i][j] = 0;
-//                    continue;
-//                }
-//                pheromone[i][j] = 1000;
-//                prob[i][j] = Math.pow(pheromone[i][j], alpha) * distanceBeta[i][j];
-//            }
-//        }
-//    }
-//
-//    public void updatePheromone(double Q, Ant bestAnt) {
-//        List<Integer> bestPath = bestAnt.getPath();
-//
-//        double [][] addPheromone  = new double[cityNum][cityNum];
-//        // 信息素增量
-//        double pheAdd = 1/bestAnt.getRoadLength();
-//        for (int i = 1; i < bestPath.size(); i++) {
-//            int start = bestPath.get(i-1);
-//            int end = bestPath.get(i);
-//            addPheromone[start][end] +=pheAdd;
-//        }
-//        // 最后城市到第一个城市
-//        int start = bestPath.get(bestPath.size()-1);
-//        int end = bestPath.get(0);
-//        addPheromone[start][end] +=pheAdd;
-//        for (int i = 0; i < cityNum; i++) {
-//            for (int j = 0; j < cityNum; j++) {
-//                pheromone[i][j] = pheromone[i][j] * rho+ addPheromone[i][j];
-//            }
-//        }
-//        double maxPheromone=1.0/(bestAnt.getRoadLength()*(1.0-rho));
-//        double minPheromone=maxPheromone*mmRate;
-//        for (int i = 0; i < cityNum; i++) {
-//            for (int j = 0; j < cityNum; j++) {
-//                if (pheromone[i][j] > maxPheromone){
-//                    pheromone[i][j] = maxPheromone;
-//                }
-//                if (pheromone[i][j] < minPheromone){
-//                    pheromone[i][j] = minPheromone;
-//                }
-//            }
-//        }
-//
-//        for (int i = 0; i < cityNum; i++) {
-//            for (int j = 0; j < cityNum; j++) {
-////                if (i == j) {
-////                    pheromone[i][j] = 0;
-////                    continue;
-////                }
-//                prob[i][j] = Math.pow(pheromone[i][j], alpha) * distanceBeta[i][j];
-//            }
-//        }
-//    }
-//
-//    public static double getDistance(int i, int j) { //注意i,j和城市之间的对应关系
-//        return distance[i][j];
-//    }
-//
-//    public static double[] getProb(int i) {
-//        return prob[i];
-//    }
-//
-////    public static double getPheromone(int i, int j) {
-////        return pheromone[i][j];
-////    }
-//
-////
-////    public static double[] getCityPheromone(int i) {
-////        return pheromone[i];
-////    }
-////
-////    public static double[] getCityDistance(int i) {
-////        return distance[i];
-////    }
-////
-////    public static void setPheromone(int i, int j, double Q, long t) {
-////        pheromone[i][j] += Q - t / 100 * pheromone[i][j];
-////    }
-//
-//    public static void printlnDistance() {
-//        System.out.println("distance is :");
-//        System.out.printf("%8s", "");
-//        for (int i = 0; i < cityNum; i++) {
-//            System.out.printf("%5s", i);
-//        }
-//        System.out.println();
-//        for (int i = 0; i < cityNum; i++) {
-//            System.out.printf("%5s", i);
-//            for (int j = 0; j < cityNum; j++) {
-//                System.out.printf("%5s", (int) distance[i][j]);
-//            }
-//            System.out.println();
-//        }
-//    }
+        distance = new double[][]{
+                {0.0, 18.68, 17.84, 32.91, 12.88, 21.53, 21.65, 24.01, 24.13, 32.77, 19.65, 26.18, 23.76, 10.1, 8.11, 8.53, 27.87, 43.45, 57.09, 27.83, 20.16, 33.51, 43.6, 50.06, 54.13, 38.58, 27.46, 26.24, 39.73, 29.72},
+                {18.55, 0.0, 5.85, 48.29, 6.29, 4.22, 5.51, 6.78, 10.86, 40.77, 30.56, 22.39, 19.97, 16.84, 13.71, 10.54, 20.09, 27.42, 48.23, 12.7, 14.76, 21.79, 35.46, 33.53, 40.14, 23.93, 23.89, 13.71, 31.05, 13.18},
+                {17.63, 5.81, 0.0, 43.03, 5.38, 8.64, 6.95, 11.11, 9.96, 35.5, 25.3, 17.12, 14.7, 12.26, 12.79, 9.62, 23.72, 31.06, 51.86, 16.33, 17.2, 25.43, 39.09, 37.16, 43.78, 27.57, 26.95, 17.34, 34.68, 15.94},
+                {32.73, 48.28, 42.97, 0.0, 42.02, 51.11, 49.42, 53.58, 48.26, 20.56, 18.53, 30.91, 37.06, 32.9, 35.4, 38.72, 59.65, 73.52, 88.87, 58.8, 51.94, 65.29, 75.38, 79.63, 86.25, 70.03, 59.25, 58.02, 71.51, 58.41},
+                {12.73, 6.43, 5.59, 42.01, 0.0, 9.28, 9.39, 11.75, 12.21, 34.48, 24.27, 20.51, 18.09, 11.03, 7.89, 4.72, 21.71, 31.69, 52.16, 16.97, 13.99, 26.07, 39.4, 37.8, 44.42, 28.2, 23.74, 17.98, 34.98, 17.46},
+                {21.41, 4.24, 8.57, 51.01, 9.16, 0.0, 5.76, 2.3, 10.82, 43.48, 33.28, 25.1, 21.47, 19.71, 16.58, 13.41, 15.83, 23.17, 43.97, 8.45, 10.51, 17.54, 31.21, 29.27, 35.89, 19.68, 19.64, 9.46, 26.79, 10.05},
+                {21.65, 5.46, 7.0, 49.44, 9.39, 5.32, 0.0, 6.93, 6.87, 41.17, 31.71, 23.53, 17.82, 18.67, 16.81, 13.64, 19.54, 26.67, 47.68, 12.15, 14.21, 21.25, 34.91, 32.77, 39.6, 23.39, 23.34, 13.16, 30.5, 10.36},
+                {23.47, 6.83, 10.62, 53.06, 11.22, 2.21, 7.0, 0.0, 12.07, 45.54, 35.33, 27.16, 23.99, 21.77, 18.63, 15.46, 13.45, 20.78, 41.59, 6.06, 8.12, 15.16, 28.82, 26.89, 33.51, 17.29, 17.25, 7.07, 24.41, 9.74},
+                {24.09, 11.26, 9.98, 47.72, 12.09, 10.39, 6.75, 12.0, 0.0, 36.05, 29.99, 18.74, 12.7, 16.95, 17.18, 16.06, 24.51, 29.83, 52.65, 16.56, 19.28, 26.22, 39.88, 35.94, 44.58, 24.68, 28.41, 18.23, 35.47, 12.75},
+                {32.64, 40.93, 35.62, 20.49, 34.67, 43.76, 41.05, 46.23, 35.95, 0.0, 12.83, 19.38, 25.63, 28.3, 31.23, 32.13, 54.75, 65.08, 85.21, 51.45, 47.03, 60.55, 72.44, 71.19, 78.9, 59.94, 56.97, 52.46, 68.03, 48.0},
+                {19.45, 30.78, 25.47, 18.45, 24.52, 33.61, 31.92, 36.08, 30.76, 12.82, 0.0, 13.41, 19.56, 18.08, 20.57, 21.98, 44.6, 56.03, 75.6, 41.3, 36.88, 50.4, 62.11, 62.13, 68.75, 52.54, 45.98, 42.31, 58.24, 40.91},
+                {26.15, 22.47, 17.17, 30.88, 20.63, 25.3, 23.62, 27.78, 18.75, 19.5, 13.37, 0.0, 8.43, 17.07, 20.0, 18.12, 40.39, 47.89, 68.53, 33.0, 32.99, 42.1, 55.76, 53.99, 60.44, 44.23, 42.74, 34.01, 51.35, 30.81},
+                {23.61, 20.64, 14.63, 37.13, 18.08, 21.58, 17.76, 23.96, 12.65, 25.77, 19.62, 8.46, 0.0, 14.53, 17.46, 15.57, 36.47, 41.79, 64.61, 28.51, 30.44, 38.18, 51.84, 47.89, 56.54, 36.64, 40.37, 30.19, 47.43, 24.71},
+                {9.89, 17.07, 12.14, 32.89, 11.27, 19.93, 18.59, 22.4, 16.88, 28.18, 18.08, 17.04, 14.62, 0.0, 3.6, 6.92, 29.74, 42.34, 58.96, 27.62, 22.03, 35.38, 45.47, 48.45, 55.07, 38.85, 29.34, 28.12, 41.6, 27.57},
+                {8.09, 13.85, 13.01, 35.44, 8.05, 16.7, 16.82, 19.18, 17.16, 31.13, 20.63, 19.98, 17.56, 3.53, 0.0, 3.7, 27.01, 39.12, 56.23, 24.4, 19.29, 32.64, 42.73, 45.23, 51.84, 35.63, 26.6, 25.38, 38.86, 24.88},
+                {8.52, 10.6, 9.76, 38.72, 4.79, 13.45, 13.57, 15.93, 16.03, 32.58, 22.38, 18.07, 15.65, 6.82, 3.68, 0.0, 24.73, 35.87, 55.19, 21.14, 17.02, 30.24, 42.43, 41.97, 48.59, 32.38, 26.77, 22.16, 38.01, 21.63},
+                {28.0, 20.49, 24.09, 59.79, 21.95, 16.14, 19.9, 13.81, 24.83, 54.81, 44.6, 40.62, 36.76, 29.81, 27.08, 25.05, 0.0, 15.67, 30.41, 8.72, 8.75, 5.73, 17.64, 22.62, 26.36, 10.81, 5.47, 6.39, 13.23, 17.7},
+                {43.35, 27.45, 31.06, 73.5, 31.65, 23.11, 26.63, 20.78, 29.83, 65.1, 55.77, 47.59, 41.75, 42.2, 39.07, 35.9, 15.65, 0.0, 26.52, 16.06, 24.11, 12.18, 24.37, 8.62, 17.65, 5.91, 20.73, 17.66, 19.07, 22.66},
+                {57.19, 48.43, 52.03, 88.97, 52.29, 44.09, 47.84, 41.75, 52.77, 85.14, 74.94, 68.56, 64.7, 59.0, 56.27, 55.38, 30.48, 26.47, 0.0, 36.66, 39.09, 27.69, 21.76, 35.55, 13.13, 31.3, 34.04, 34.33, 21.37, 45.64},
+                {27.73, 12.79, 16.39, 58.83, 16.99, 8.45, 12.2, 6.11, 16.6, 51.3, 41.1, 32.92, 28.52, 27.53, 24.4, 21.23, 8.44, 16.16, 36.58, 0.0, 8.16, 10.15, 23.81, 22.26, 28.5, 12.28, 13.99, 2.52, 19.4, 9.85},
+                {20.14, 14.97, 17.32, 51.92, 14.09, 10.63, 14.39, 7.84, 19.45, 46.94, 36.74, 32.97, 30.55, 21.95, 19.22, 17.19, 8.55, 24.13, 39.01, 8.64, 0.0, 14.19, 26.24, 31.08, 34.82, 19.27, 10.59, 7.05, 21.83, 14.95},
+                {33.43, 21.83, 25.44, 65.21, 26.03, 17.49, 21.25, 15.16, 26.18, 60.35, 50.15, 41.97, 38.1, 35.24, 32.51, 30.28, 5.72, 12.12, 27.54, 10.07, 14.18, 0.0, 16.39, 19.07, 20.88, 7.26, 10.59, 7.74, 11.98, 19.05},
+                {43.59, 35.57, 39.17, 75.37, 39.43, 31.23, 34.99, 28.89, 39.92, 72.29, 62.12, 55.71, 51.84, 45.4, 42.67, 42.53, 17.63, 24.23, 21.53, 23.81, 26.23, 16.41, 0.0, 32.43, 21.73, 22.43, 20.17, 21.48, 6.42, 32.79},
+                {50.02, 33.57, 37.17, 79.61, 37.77, 29.23, 32.75, 26.89, 35.94, 71.22, 61.88, 53.71, 47.87, 48.32, 45.19, 42.01, 22.61, 8.65, 35.62, 22.18, 31.06, 19.14, 32.45, 0.0, 26.75, 12.87, 27.68, 23.94, 27.16, 28.78},
+                {53.87, 40.07, 43.67, 86.11, 44.27, 35.73, 39.49, 33.39, 44.43, 78.59, 68.38, 60.21, 56.35, 54.82, 51.68, 48.51, 26.16, 17.39, 13.18, 28.31, 34.62, 20.69, 21.6, 26.47, 0.0, 22.22, 31.24, 28.16, 21.23, 37.3},
+                {38.38, 23.85, 27.45, 69.9, 28.05, 19.51, 23.27, 17.18, 24.66, 62.37, 52.16, 43.99, 36.58, 38.6, 35.47, 32.29, 10.67, 5.94, 31.22, 12.09, 19.13, 7.2, 22.43, 12.89, 22.35, 0.0, 15.75, 12.69, 18.01, 17.5},
+                {27.51, 24.06, 27.14, 59.29, 23.91, 19.72, 23.47, 17.38, 28.54, 56.92, 46.04, 42.8, 40.46, 29.32, 26.59, 27.01, 5.48, 20.72, 32.82, 13.51, 10.71, 10.69, 19.32, 27.67, 33.03, 15.86, 0.0, 11.18, 15.45, 22.49},
+                {26.17, 13.88, 17.48, 57.96, 18.08, 9.54, 13.29, 7.2, 18.36, 52.4, 42.19, 34.01, 30.28, 27.98, 25.25, 22.32, 6.14, 17.79, 34.28, 2.54, 6.6, 7.85, 21.51, 23.97, 28.46, 12.92, 11.69, 0.0, 17.1, 12.63},
+                {39.73, 31.18, 34.78, 71.52, 35.04, 26.84, 30.6, 24.51, 35.53, 67.9, 58.26, 51.32, 47.45, 41.54, 38.81, 38.14, 13.24, 19.03, 21.21, 19.42, 21.84, 12.02, 5.99, 27.22, 21.65, 18.04, 16.31, 17.09, 0.0, 28.4},
+                {29.89, 13.44, 15.82, 58.26, 17.64, 9.94, 10.24, 9.64, 12.67, 47.95, 40.53, 30.63, 24.59, 27.49, 25.05, 21.88, 17.42, 22.71, 45.57, 9.79, 14.83, 19.13, 32.8, 28.82, 37.49, 17.57, 22.98, 12.53, 28.39, 0.0}
+        };
+        printlndistance();
+        return distance;
+    }
+
+    public static double getDistance(int i, int j) { //注意i,j和城市之间的对应关系
+        return distance[i][j];
+    }
+
+
+    /**
+     * 获取访问路径的长度
+     * TODO 这个看起来太复杂了
+     * @param road
+     * @return
+     */
+    public static double getDistance(Integer[] road) {
+        double roadLen = 0.0;
+        for (int i = 1; i < road.length; i++) {
+            roadLen += distance[road[i-1]][road[i]];
+        }
+        roadLen +=  distance[road[road.length-1]][road[0]];
+        return roadLen;
+    }
+
+    public static double getDistance(List<Integer> road) {
+        double roadLen = 0.0;
+        for (int i = 1; i < road.size(); i++) {
+            roadLen += distance[road.get(i-1)][road.get(i)];
+        }
+        roadLen +=  distance[road.get(road.size()-1)][road.get(0)];
+        return roadLen;
+    }
+
+    private static void printlndistance() {
+        System.out.printf("%8s","");
+        for (int i = 0; i < num; i++) {
+            System.out.printf("%5s",i);
+        }
+        System.out.println();
+        for (int i = 0; i < num; i++) {
+            System.out.printf("%5s",i);
+            for (int j = 0; j < num; j++) {
+                System.out.printf("%5s",(int)distance[i][j]);
+            }
+            System.out.println();
+        }
+    }
+
+
+    public static void main(String[] args) {
+        DistanceUtil.initDistance(11);
+        Integer[] road= {0, 6, 22, 23, 24, 1, 7, 14, 17, 18, 11, 29, 21, 12, 25, 26, 8, 28, 20, 16, 15, 10, 13, 27, 5, 3, 4, 2, 19, 9};
+        System.out.println(DistanceUtil.getDistance(road));
+    }
 }

@@ -1,7 +1,7 @@
 package tsp.soluction.demo.gammas;
 import lombok.Getter;
 import lombok.Setter;
-import tsp.soluction.demo.gaaa.DistanceUtil;
+import tsp.soluction.demo.util.DistanceUtil;
 
 import java.util.*;
 

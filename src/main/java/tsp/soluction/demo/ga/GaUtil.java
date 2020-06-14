@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tsp.soluction.demo.gaaa;
+package tsp.soluction.demo.ga;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,8 +14,16 @@ import java.util.stream.Collectors;
  *
  * @author sanwu
  */
-public class GaaaUtil {
+public class GaUtil {
 
+    /**
+     * 查找最优秀的 topNum 个染色体
+     *
+     * @param survivalProb
+     * @param chromosomes
+     * @param topNum
+     * @return
+     */
     public static List<Chromosome> findBestNIndex(Double[] survivalProb, Chromosome[] chromosomes, int topNum) {
         Arrays.stream(chromosomes).collect(Collectors.toSet());
         List<Double> survivalProbList = Arrays.asList(survivalProb);
@@ -43,8 +51,6 @@ public class GaaaUtil {
     /**
      * 部分匹配法  交配
      *
-//     * @param papa
-//     * @param mama
      * @param cutPointLow
      * @param cutPointHigh
      */
@@ -76,6 +82,12 @@ public class GaaaUtil {
         crossMapping(mamaRoad, mamaMapping, mappingIndex, papaRoad.length);
     }
 
+    /**
+     * 部分匹配法  交配
+     *
+     * @param cutPointLow
+     * @param cutPointHigh
+     */
     public static void cross( Integer[] papaRoad,  Integer[] mamaRoad, int cutPointLow, int cutPointHigh) {
         LinkedHashMap<Integer, Integer> papaMapping = new LinkedHashMap<>();
         LinkedHashMap<Integer, Integer> mamaMapping = new LinkedHashMap<>();
@@ -91,10 +103,6 @@ public class GaaaUtil {
             newMamaList.add(papaRoad[i]);
         }
         int newLen = newMamaList.size();
-//        for (int i = cutPointHigh; i >= cutPointLow ; i--) {
-//            restPapaList.remove(i);
-//            restMamaList.remove(i);
-//        }
         newPapaList.addAll(restPapaList);
         newMamaList.addAll(restMamaList);
         for (int i = newPapaList.size()-1; i >= newLen; i--) {
