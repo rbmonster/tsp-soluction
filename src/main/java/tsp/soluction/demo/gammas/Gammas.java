@@ -25,7 +25,7 @@ import java.util.*;
 public class Gammas {
 
     private GaCity initCity;
-    private int cityNum = 30;
+    private int cityNum = 8;
     private int p = 300;//迭代次数
     private int antNum = 30;
     private GaAnt[] gaAnts;
@@ -68,23 +68,28 @@ public class Gammas {
      */
     public void run() {
         initDistance();
-
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        for (int i = 0; i < p; i++) {//一次迭代即更新了一次解空间
-            System.out.println("第" + i + "次迭代：");
+        for (int i = 0; i < p; i++) {
+            //初始化数据
             initAnts();
+            // 选择下一个城市
             movetoNextCity();
+            // 计算适应度
             calculateProb();
+            // 染色体杂交
             mating();
+            // 染色体变异
             mutation();
+            // 生成下一代染色体
             copyGeneration();
+            // 寻找最佳路径
             findBestRoad(i);
+            // 更新信息素
             updatePheromone();
         }
         stopWatch.stop();
         costTime = stopWatch.getTotalTimeMillis();
-//        bestLength = Double.MAX_VALUE;
     }
 
     private void calculateProb(){
